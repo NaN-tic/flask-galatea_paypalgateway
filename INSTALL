@@ -1,0 +1,21 @@
+Installing flask-galatea_paypalgateway
+======================================
+
+Prerequisites
+-------------
+
+ * Python 2.7 or later (http://www.python.org/)
+ * trytond (http://www.tryton.org/)
+ * trytond-galatea
+ * trytond-account_payment_gateway_paypal
+
+Installation
+------------
+
+Once you've downloaded and unpacked the flask-galatea-paypal source release,
+copy galatea-paypal directory in main flask app and rename to paypal.
+
+Edit your App flask and register a new blueprint:
+
+from paypalgateway import paypalgateway
+app.register_blueprint(paypalgateway, url_prefix='/<lang>/paypal')

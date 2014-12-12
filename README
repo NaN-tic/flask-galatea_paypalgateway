@@ -1,0 +1,60 @@
+flask-galatea-paypalgateway
+===========================
+
+The Galatea Payment Paypal (Classic API) module of the Flask application platform.
+
+Installing
+----------
+
+See INSTALL
+
+Support
+-------
+
+For more information or if you encounter any problems with this module,
+please paypal the programmers at
+
+  Zikzakmedia
+  --------------
+  website: http://www.zikzakmedia.com/
+  email: zikzak@zikzakmedia.com
+
+If you encounter any problems with Tryton, please don't hesitate to ask
+questions on the Tryton bug tracker, mailing list, wiki or IRC channel:
+
+  http://bugs.tryton.org/
+  http://groups.tryton.org/
+  http://wiki.tryton.org/
+  irc://irc.freenode.net/tryton
+
+License
+-------
+
+See LICENSE
+
+Copyright
+---------
+
+See COPYRIGHT
+
+
+For more information please visit the Tryton web site:
+
+  http://www.tryton.org/
+
+PayPal Form
+-----------
+
+```html
+<form id="paypal" action="{{ paypal_form['url'] }}" method="post" name="paypal">
+    <input type="hidden" name="cmd" value="_xclick">
+    <input type="hidden" name="business" value="{{ paypal_form['business'] }}">
+    <input type="hidden" name="item_name" value="{{ paypal_form['reference'] }}">
+    <input type="hidden" name="amount" value="{{ paypal_form['amount'] }}">
+    <input type="hidden" name="currency_code" value="{{ paypal_form['currency'] }}">
+    <input type="hidden" name="return" value="{{ paypal_form['return'] }}">
+    <input type="hidden" name="cancel_return" value="{{ paypal_form['cancel'] }}">
+    <input type="hidden" name="notify_url" value="{{ paypal_form['notify'] }}">
+    <input type="submit" value="{{ _('Pay') }}" class="btn btn-lg btn-success">
+</form>
+```

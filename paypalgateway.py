@@ -75,12 +75,12 @@ def paypal_ipn(lang):
     GatewayTransaction.confirm([gtransaction])
     return 'ok'
 
-@paypalgateway.route('/confirm', endpoint="confirm")
+@paypalgateway.route('/confirm', methods=['GET', 'POST'], endpoint="confirm")
 @tryton.transaction()
 def paypal_confirm(lang):
     return render_template('paypal-confirm.html')
 
-@paypalgateway.route('/cancel', endpoint="cancel")
+@paypalgateway.route('/cancel', methods=['GET', 'POST'], endpoint="cancel")
 @tryton.transaction()
 def paypal_cancel(lang):
     return render_template('paypal-cancel.html')

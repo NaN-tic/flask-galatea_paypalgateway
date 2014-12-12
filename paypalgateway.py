@@ -5,6 +5,7 @@ from flask import Blueprint, request, render_template, flash, current_app, g, \
     session, abort, url_for, redirect
 from flask.ext.babel import gettext as _
 from galatea.tryton import tryton
+from galatea.csrf import csrf
 from decimal import Decimal
 
 paypalgateway = Blueprint('paypalgateway', __name__, template_folder='templates')
@@ -17,6 +18,7 @@ GatewayTransaction = tryton.pool.get('account.payment.gateway.transaction')
 PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr"
 PAYPAL_SANDBOX_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr"
 
+@csrf.exempt
 @paypalgateway.route('/ipn', methods=['POST'], endpoint="ipn")
 @tryton.transaction()
 def paypal_ipn(lang):

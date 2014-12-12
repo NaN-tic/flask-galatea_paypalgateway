@@ -17,6 +17,7 @@ GatewayTransaction = tryton.pool.get('account.payment.gateway.transaction')
 
 PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr"
 PAYPAL_SANDBOX_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr"
+PAYPAL_RESPONSES_DONE = ['Completed']
 
 @csrf.exempt
 @paypalgateway.route('/ipn', methods=['POST'], endpoint="ipn")
@@ -76,7 +77,7 @@ def paypal_ipn(lang):
         gtransaction.save()
 
     # Process transaction
-    if response !=  'Completed':
+    if response not in PAYPAL_RESPONSES_DONE:
         return 'ko'
 
     # Confirm transaction 'Completed'

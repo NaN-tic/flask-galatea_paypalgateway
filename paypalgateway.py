@@ -17,7 +17,13 @@ GatewayTransaction = tryton.pool.get('account.payment.gateway.transaction')
 
 PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr"
 PAYPAL_SANDBOX_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr"
-PAYPAL_RESPONSES_DONE = ['Completed']
+
+# DOC https://developer.paypal.com/docs/classic/ipn/integration-guide/IPNandPDTVariables/
+PAYPAL_RESPONSES_CANCEL = ['Canceled_Reversal', 'Denied', 'Expired', 'Voided']
+PAYPAL_RESPONSES_PENDING = ['Pending']
+PAYPAL_RESPONSES_FAILED = ['Failed']
+PAYPAL_RESPONSES_AUTHORIZED = []
+PAYPAL_RESPONSES_DONE = ['Completed', 'Created', 'Refunded', 'Reversed', 'Processed']
 
 @csrf.exempt
 @paypalgateway.route('/ipn', methods=['POST'], endpoint="ipn")
@@ -33,7 +39,6 @@ def paypal_ipn(lang):
     address_zip, payment_fee, address_country_code, address_city, address_status,
     mc_fee, mc_currency, shipping, payer_email, payment_type, mc_gross,
     ipn_track_id, quantity
-
     """
     shop = Shop(SHOP)
 
@@ -77,12 +82,27 @@ def paypal_ipn(lang):
         gtransaction.save()
 
     # Process transaction
-    if response not in PAYPAL_RESPONSES_DONE:
-        return 'ko'
+    if response in PAYPAL_RESPONSES_CANCEL:
+        GatewayTransaction.cancel([gtransaction])
+        return response
 
-    # Confirm transaction 'Completed'
-    GatewayTransaction.confirm([gtransaction])
-    return 'ok'
+    if response in PAYPAL_RESPONSES_PENDING:
+        GatewayTransaction.pending([gtransaction])
+        return response
+
+    if response in PAYPAL_RESPONSES_FAILED:
+        GatewayTransaction.cancel([gtransaction])
+        return response
+
+    if response in PAYPAL_RESPONSES_AUTHORIZED:
+        GatewayTransaction.authorized([gtransaction])
+        return response
+
+    if response in PAYPAL_RESPONSES_DONE:
+        GatewayTransaction.confirm([gtransaction])
+        return response
+
+    return 'ko'
 
 @csrf.exempt
 @paypalgateway.route('/confirm', methods=['GET', 'POST'], endpoint="confirm")

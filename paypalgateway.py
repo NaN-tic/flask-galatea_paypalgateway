@@ -3,7 +3,7 @@
 #the full copyright notices and license terms.
 from flask import Blueprint, request, render_template, flash, current_app, g, \
     session, abort, url_for, redirect
-from flask.ext.babel import gettext as _
+from flask_babel import gettext as _
 from galatea.tryton import tryton
 from galatea.csrf import csrf
 from decimal import Decimal

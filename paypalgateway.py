@@ -159,6 +159,14 @@ def paypal_form(lang):
     if getattr(r, 'currency'):
         currency = getattr(r, 'currency')
 
+    # Remove old possible transactions not used
+    gtransactions = GatewayTransaction.search([
+        ('origin', '=', origin),
+        ('state', '=', 'draft'),
+        ])
+    if gtransactions:
+        GatewayTransaction.delete(gtransactions)
+
     # save transaction draft
     gtransaction = GatewayTransaction()
     gtransaction.description = reference

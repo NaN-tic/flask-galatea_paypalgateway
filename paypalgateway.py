@@ -1,5 +1,5 @@
 #This file is part paypalgateway blueprint for Flask.
-#The COPYRIGHT file at the top level of this repository contains 
+#The COPYRIGHT file at the top level of this repository contains
 #the full copyright notices and license terms.
 from flask import Blueprint, request, render_template, flash, current_app, g, \
     session, abort, url_for, redirect
@@ -52,7 +52,8 @@ def paypal_ipn(lang):
 
     reference = request.form.get('item_name')
     response = request.form.get('payment_status')
-    amount = Decimal(request.form.get('mc_gross'))
+    amount = Decimal(request.form.get('mc_gross')
+        if request.form.get('mc_gross') else '0.0')
     authorisation_code = request.form.get('verify_sign')
 
     logs = []

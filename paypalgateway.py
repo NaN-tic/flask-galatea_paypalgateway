@@ -6,7 +6,7 @@ from flask import (Blueprint, request, render_template, flash, current_app, g,
 from flask_babel import gettext as _
 from galatea.tryton import tryton
 from galatea.csrf import csrf
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 paypalgateway = Blueprint('paypalgateway', __name__, template_folder='templates')
 
@@ -139,26 +139,33 @@ def paypal_form(lang):
     url_confirm = '%s%s' % (base_url, url_for('.confirm', lang=g.language))
     url_cancel = '%s%s' % (base_url, url_for('.cancel', lang=g.language))
 
-    origin = request.form.get('origin')
-    if not origin:
-        abort(404)
-    try:
-        o = origin.split(',')
-        r = tryton.pool.get(o[0])(o[1])
-    except:
-        abort(500)
+    currency = shop.currency or shop.company.currency
     reference = request.form.get('reference')
-    if getattr(r, 'total_amount'):
-        total_amount = getattr(r, 'total_amount')
-    else:
-        flash(_("Error when get total amount to pay. Repeat or contact us."),
-            "danger")
-        redirect(url_for('/', lang=g.language))
-    amount = total_amount - r.gateway_amount
+    origin = request.form.get('origin')
+    if origin:
+        try:
+            o = origin.split(',')
+            r = tryton.pool.get(o[0])(o[1])
+        except:
+            abort(500)
+        if getattr(r, 'total_amount'):
+            total_amount = getattr(r, 'total_amount')
+        else:
+            flash(_("Error when get total amount to pay. Repeat or contact us."),
+                "danger")
+            redirect(url_for('/', lang=g.language))
+        amount = total_amount - r.gateway_amount
 
-    currency = None
-    if getattr(r, 'currency'):
-        currency = getattr(r, 'currency')
+        if getattr(r, 'currency'):
+            currency = getattr(r, 'currency')
+
+    elif request.form.get('amount'):
+        try:
+            amount = Decimal(request.form.get('amount'))
+        except InvalidOperation:
+            abort(500)
+    else:
+        abort(404)
 
     # Remove old possible transactions not used
     gtransactions = GatewayTransaction.search([
@@ -176,8 +183,7 @@ def paypal_form(lang):
     gtransaction.reference_gateway = reference
     gtransaction.party = session.get('customer', None)
     gtransaction.amount = amount
-    if currency:
-        gtransaction.currency = currency
+    gtransaction.currency = currency
     gtransaction.save()
 
     paypal_form = {}
@@ -185,7 +191,7 @@ def paypal_form(lang):
     paypal_form['business'] = gateway.paypal_email
     paypal_form['reference'] = reference
     paypal_form['amount'] = amount
-    paypal_form['currency'] = currency.code if currency else 'EUR' # TODO currency from company
+    paypal_form['currency'] = currency.code
     paypal_form['return'] = url_confirm
     paypal_form['cancel'] = url_cancel
     paypal_form['notify'] = url_ipn

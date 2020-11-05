@@ -56,10 +56,7 @@ def paypal_ipn(lang):
         if request.form.get('mc_gross') else '0.0')
     authorisation_code = request.form.get('verify_sign')
 
-    logs = []
-    for k, v in request.form.iteritems():
-        logs.append('%s: %s' % (k, v))
-    log = "\n".join(logs)
+    log = "\n".join(['%s: %s' % (k, v) for k, v in request.form.items()])
 
     # Search transaction
     gtransactions = GatewayTransaction.search([

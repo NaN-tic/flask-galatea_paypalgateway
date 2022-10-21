@@ -164,13 +164,13 @@ def paypal_form(lang):
     else:
         abort(404)
 
-    # Remove old possible transactions not used
+    # cancel old possible transactions not used
     gtransactions = GatewayTransaction.search([
         ('origin', '=', origin),
         ('state', '=', 'draft'),
         ])
     if gtransactions:
-        GatewayTransaction.delete(gtransactions)
+        GatewayTransaction.cancel(gtransactions)
 
     # save transaction draft
     gtransaction = GatewayTransaction()

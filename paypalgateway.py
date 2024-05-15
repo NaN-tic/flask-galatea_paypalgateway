@@ -67,7 +67,7 @@ def paypal_ipn(lang):
         gtransaction, = gtransactions
         gtransaction.authorisation_code = authorisation_code
         gtransaction.amount = amount
-        gtransaction.log = log
+        gtransaction.gateway_log = log
         gtransaction.save()
     else:
         gtransaction = GatewayTransaction()
@@ -76,7 +76,7 @@ def paypal_ipn(lang):
         gtransaction.gateway = gateway
         gtransaction.reference_gateway = reference
         gtransaction.amount = amount
-        gtransaction.log = log
+        gtransaction.gateway_log = log
         gtransaction.save()
 
     # Process transaction

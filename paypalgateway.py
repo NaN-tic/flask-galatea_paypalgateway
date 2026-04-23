@@ -4,16 +4,14 @@
 from flask import (Blueprint, request, render_template, flash, current_app, g,
     session, abort, url_for, redirect)
 from flask_babel import gettext as _
-from galatea.tryton import tryton
-from galatea.csrf import csrf
+from app_extensions import tryton
 from decimal import Decimal, InvalidOperation
 
 paypalgateway = Blueprint('paypalgateway', __name__, template_folder='templates')
 
-SHOP = current_app.config.get('TRYTON_SALE_SHOP')
+def _shop_id():
+    return current_app.config.get('TRYTON_SALE_SHOP')
 
-Shop = tryton.pool.get('sale.shop')
-GatewayTransaction = tryton.pool.get('account.payment.gateway.transaction')
 
 PAYPAL_URL = "https://www.paypal.com/cgi-bin/webscr"
 PAYPAL_SANDBOX_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr"
@@ -25,7 +23,6 @@ PAYPAL_RESPONSES_FAILED = ['Failed']
 PAYPAL_RESPONSES_AUTHORIZED = []
 PAYPAL_RESPONSES_DONE = ['Completed', 'Created', 'Refunded', 'Reversed', 'Processed']
 
-@csrf.exempt
 @paypalgateway.route('/ipn', methods=['POST'], endpoint="ipn")
 @tryton.transaction()
 def paypal_ipn(lang):
@@ -40,7 +37,10 @@ def paypal_ipn(lang):
     mc_fee, mc_currency, shipping, payer_email, payment_type, mc_gross,
     ipn_track_id, quantity
     """
-    shop = Shop(SHOP)
+    Shop = tryton.pool.get('sale.shop')
+    GatewayTransaction = tryton.pool.get('account.payment.gateway.transaction')
+
+    shop = Shop(_shop_id())
 
     gateway = None
     for payment in shop.esale_payments:
@@ -102,13 +102,11 @@ def paypal_ipn(lang):
 
     return 'ko'
 
-@csrf.exempt
 @paypalgateway.route('/confirm', methods=['GET', 'POST'], endpoint="confirm")
 @tryton.transaction()
 def paypal_confirm(lang):
     return render_template('paypal-confirm.html')
 
-@csrf.exempt
 @paypalgateway.route('/cancel', methods=['GET', 'POST'], endpoint="cancel")
 @tryton.transaction()
 def paypal_cancel(lang):
@@ -117,7 +115,10 @@ def paypal_cancel(lang):
 @paypalgateway.route('/', methods=['POST'], endpoint="paypal")
 @tryton.transaction()
 def paypal_form(lang):
-    shop = Shop(SHOP)
+    Shop = tryton.pool.get('sale.shop')
+    GatewayTransaction = tryton.pool.get('account.payment.gateway.transaction')
+
+    shop = Shop(_shop_id())
 
     base_url = current_app.config['BASE_URL']
 
